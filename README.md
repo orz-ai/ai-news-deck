@@ -1,4 +1,4 @@
-# AI News Follower
+# AI News Deck
 ![](Snipaste.png)
 
 一个简单的 AI 新闻聚合器，自动抓取 RSS 源并提供搜索过滤。
