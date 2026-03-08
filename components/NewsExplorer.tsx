@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 
 import type { NewsItem, SourceItem, Stats } from "../lib/api";
-import { fetchNews } from "../lib/api";
+import { fetchNews, fetchStats } from "../lib/api";
 import CustomSelect from "./CustomSelect";
 
 const DEFAULT_LIMIT = 30;
@@ -37,7 +37,23 @@ export default function NewsExplorer({
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [liveStats, setLiveStats] = useState<Stats | null>(stats);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // 定期轮询统计数据，保持总量实时更新
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      const data = await fetchStats();
+      if (!cancelled && data) setLiveStats(data);
+    };
+    void poll();
+    const timer = setInterval(() => void poll(), 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
 
   const enabledSources = useMemo(
     () => sources.filter((item) => item.enabled),
@@ -124,7 +140,7 @@ export default function NewsExplorer({
           <p className="max-w-2xl text-base text-slate/70">
             内置 API + SQLite，支持按来源、语言、关键字即时过滤。当前库内共有
             <span className="mx-2 inline-flex items-center rounded-full bg-ink px-3 py-1 text-xs font-semibold text-pearl">
-              {stats?.total_news ?? 0} 条
+              {liveStats?.total_news ?? 0} 条
             </span>
             记录。
           </p>
