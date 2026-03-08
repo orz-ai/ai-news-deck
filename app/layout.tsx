@@ -46,12 +46,21 @@ export const metadata: Metadata = {
     title: "AI News Deck",
     description: "聚合最新 AI 行业新闻，清晰可读的前端展示与实时更新。",
     siteName: "AI News Deck",
-    locale: "zh_CN"
+    locale: "zh_CN",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "AI News Deck — 洞见 AI 行业新动向"
+      }
+    ]
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "AI News Deck",
-    description: "聚合最新 AI 行业新闻，清晰可读的前端展示与实时更新。"
+    description: "聚合最新 AI 行业新闻，清晰可读的前端展示与实时更新。",
+    images: ["/opengraph-image"]
   }
 };
 

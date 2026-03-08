@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import NewsExplorer from "../components/NewsExplorer";
 import { listNews, countNews } from "../lib/server/news";
 import { loadSources } from "../lib/server/sources";
 import { startScheduler } from "../lib/server/scheduler";
+
+export const metadata: Metadata = {
+  title: "AI News Deck — 洞见 AI 行业新动向",
+  description: "聚合来自多渠道的最新 AI 资讯，支持关键词、来源与语言快速筛选，帮你高效定位有价值的更新。",
+  alternates: { canonical: "/" }
+};
 
 export default async function HomePage() {
   // 确保调度器启动
@@ -14,7 +21,7 @@ export default async function HomePage() {
   ]);
   const stats = { total_news: totalNews };
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const structuredData = {
+  const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "AI News Deck",
@@ -28,11 +35,40 @@ export default async function HomePage() {
     }
   };
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "最新 AI 行业新闻",
+    url: siteUrl,
+    numberOfItems: news.length,
+    itemListElement: news.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "NewsArticle",
+        headline: item.title,
+        url: item.link,
+        ...(item.summary ? { description: item.summary } : {}),
+        ...(item.published_at ? { datePublished: item.published_at } : {}),
+        dateModified: item.created_at,
+        publisher: {
+          "@type": "Organization",
+          name: item.source
+        },
+        inLanguage: item.language ?? "zh-CN"
+      }
+    }))
+  };
+
   return (
     <main className="px-6 pb-20 pt-12 md:px-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
       <div className="mx-auto max-w-6xl">
         <header className="grid gap-6 md:grid-cols-[1.3fr_1fr] md:items-end">
